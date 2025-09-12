@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:job_tracker/screens/dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -66,7 +65,7 @@ class LoginScreen extends StatelessWidget {
         ));
       },
       theme: LoginTheme(
-        logoWidth: 0.75,
+        logoWidth: 1,
       ),
     );
   }
