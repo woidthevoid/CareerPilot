@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:job_tracker/screens/login_screen.dart';
-import 'package:job_tracker/services/job_applications_provider.dart';
-import 'package:job_tracker/widgets/application_card.dart';
-import 'package:job_tracker/widgets/stats_header.dart';
+import 'package:CareerPilot/screens/login_screen.dart';
+import 'package:CareerPilot/services/job_applications_provider.dart';
+import 'package:CareerPilot/widgets/application_card.dart';
+import 'package:CareerPilot/widgets/stats_header.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,23 +33,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  final List<Color> _cardColors = [
-    Colors.red.shade400,
-    Colors.blue.shade400,
-    Colors.green.shade400,
-    Colors.orange.shade400,
-    Colors.purple.shade400,
-    Colors.teal.shade400,
-    Colors.indigo.shade400,
-    Colors.pink.shade400,
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Dashboard'),
           elevation: 0,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           actions: [
             IconButton(
               icon: Icon(Icons.logout),
@@ -134,34 +124,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       StatsHeader(applications: provider.applications),
                       const SizedBox(height: 24),
                       Expanded(
-                          child: LayoutBuilder(builder: (context, constraints) {
-                        int crossAxisCount = 2;
-                        if (constraints.maxWidth > 900) {
-                          crossAxisCount = 4;
-                        } else if (constraints.maxWidth > 600) {
-                          crossAxisCount = 3;
-                        }
-
-                        return GridView.builder(
+                        child: ListView.builder(
                           itemCount: provider.applications.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 1.4,
-                          ),
                           itemBuilder: (context, index) {
                             final application = provider.applications[index];
-                            final color =
-                                _cardColors[index % _cardColors.length];
-                            return ApplicationCard(
-                              application: application,
-                              cardColor: color,
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: ApplicationCard(
+                                application: application,
+                                cardColor: Theme.of(context).colorScheme.surfaceContainer,
+                              ),
                             );
                           },
-                        );
-                      }))
+                        ),
+                      )
                     ],
                   )));
         }));

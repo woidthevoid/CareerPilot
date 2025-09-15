@@ -1,16 +1,10 @@
-# job_tracker
+# CareerPilot
 
-Your personal job assistant
+Helping you pilot through you job search easily,
 
-## Getting Started
+## What is it?
+CareerPilot is a Flutter application that aims to make it easier to keep track of your applications and where in the proces they are, since it can be challening searching hundreds of jobs, forgetting which you applied to. The app is made for ios and macos in mind in the current state.
 
-This project is a starting point for a Flutter application.
+## Structure
+CareerPilot is quite simple built, as it depends solely on a Supabase setup with authentication and database. In the future, a backend will be connected for the sole purpose of webs scraping job postings tailored to each individual preference.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

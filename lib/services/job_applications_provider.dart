@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:job_tracker/models/job_application.dart';
+import 'package:CareerPilot/models/job_application.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class JobApplicationsProvider extends ChangeNotifier {
@@ -43,31 +43,34 @@ class JobApplicationsProvider extends ChangeNotifier {
   }
 
   Future<void> fetchApplications({bool force = false}) async {
-    if(!force && _hasInitiallyFetched) {
+    if (!force && _hasInitiallyFetched) {
       return;
-}
+    }
 
     await _fetchApplications();
-}
+  }
 
-Future<void> _fetchApplications() async {
+  Future<void> _fetchApplications() async {
     _setLoading(true);
     _clearErrorMessage();
 
     try {
       final response = await _client
           .from('job_applications')
-          .select('id, title, description, job_link, created_at, application_status')
+          .select(
+              'id, title, description, job_link, created_at, application_status')
           .order('created_at', ascending: false);
 
-      _applications = response.map<JobApplication>((item) => JobApplication(
-        id: item['id'].toString(),
-        title: item['title'] ?? '',
-        description: item['description'] ?? '',
-        jobLink: item['job_link'] ?? '',
-        createdAt: DateTime.tryParse(item['created_at'] ?? '') ?? DateTime.now(),
-        applicationStatus: item['application_status'] ?? 'not applied'
-      )).toList();
+      _applications = response
+          .map<JobApplication>((item) => JobApplication(
+              id: item['id'].toString(),
+              title: item['title'] ?? '',
+              description: item['description'] ?? '',
+              jobLink: item['job_link'] ?? '',
+              createdAt:
+                  DateTime.tryParse(item['created_at'] ?? '') ?? DateTime.now(),
+              applicationStatus: item['application_status'] ?? 'not applied'))
+          .toList();
 
       _hasInitiallyFetched = true;
     } catch (e) {
@@ -75,7 +78,18 @@ Future<void> _fetchApplications() async {
     } finally {
       _setLoading(false);
     }
+  }
 
-}
+  Future<void> deleteApplication(String id) async {
+    _clearErrorMessage();
 
+    try {
+      await _client.from('job_applications').delete().eq('id', id);
+
+      _applications.removeWhere((app) => app.id == id);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to delete application: $e');
+    }
+  }
 }

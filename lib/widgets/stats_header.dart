@@ -24,15 +24,8 @@ class StatsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +57,7 @@ class StatsHeader extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: StatItem(
-                  label: 'Interviewing',
+                  label: 'Interview',
                   value: interviewingCount.toString(),
                   color: Colors.green,
                 ),

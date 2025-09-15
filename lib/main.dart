@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:job_tracker/screens/login_screen.dart';
-import 'package:job_tracker/services/job_applications_provider.dart';
+import 'package:CareerPilot/screens/login_screen.dart';
+import 'package:CareerPilot/services/job_applications_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:job_tracker/screens/dashboard_screen.dart';
+import 'package:CareerPilot/screens/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
