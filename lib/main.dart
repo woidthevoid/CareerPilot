@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final session = Supabase.instance.client.auth.currentSession;
     return MaterialApp(
-      title: 'Career Pilot',
+      title: 'CareerPilot',
       theme: FlexThemeData.light(scheme: FlexScheme.aquaBlue) ,
       darkTheme: FlexThemeData.dark(scheme: FlexScheme.aquaBlue),
       home: session != null ? const DashboardScreen() : const LoginScreen(),
