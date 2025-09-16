@@ -58,7 +58,7 @@ class ApplicationCard extends StatelessWidget {
           title: Row(
             children: [
               Icon(Icons.warning, color: Colors.red),
-              const SizedBox(height: 8),
+              const SizedBox(width: 8),
               const Text('Delete application'),
             ],
           ),
@@ -217,6 +217,19 @@ class ApplicationCard extends StatelessWidget {
               ),
               
               const SizedBox(height: 8),
+
+              //Company
+              Text(
+                application.companyName,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 8),
               
               // Description
               Text(
@@ -251,7 +264,7 @@ class ApplicationCard extends StatelessWidget {
                         // Navigate to edit screen
                       },
                       icon: Icon(Icons.edit_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                       padding: EdgeInsets.zero,
                     ),
                   ),

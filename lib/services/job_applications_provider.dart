@@ -58,12 +58,13 @@ class JobApplicationsProvider extends ChangeNotifier {
       final response = await _client
           .from('job_applications')
           .select(
-              'id, title, description, job_link, created_at, application_status')
+              'id, title, description, job_link, created_at, application_status, company_name')
           .order('created_at', ascending: false);
 
       _applications = response
           .map<JobApplication>((item) => JobApplication(
               id: item['id'].toString(),
+              companyName: item['company_name'] ?? '',
               title: item['title'] ?? '',
               description: item['description'] ?? '',
               jobLink: item['job_link'] ?? '',
