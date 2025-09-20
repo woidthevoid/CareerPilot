@@ -1,3 +1,4 @@
+import 'package:CareerPilot/services/user_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:CareerPilot/screens/login_screen.dart';
 import 'package:CareerPilot/services/job_applications_provider.dart';
@@ -13,10 +14,13 @@ Future<void> main() async {
       url: 'https://znlyezdoxqdkravzrqhy.supabase.co',
       anonKey: 'sb_publishable_4p0QTK3wL1-OaKkMMGLa2w_rMOdBcCD');
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => JobApplicationsProvider(),
-      child: const MyApp(),
-    ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => JobApplicationsProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+      ],
+      child: MyApp(),
+      )
   );
 }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:CareerPilot/screens/login_screen.dart';
 import 'package:CareerPilot/services/job_applications_provider.dart';
+import 'package:CareerPilot/services/user_profile_provider.dart';
 import 'package:CareerPilot/widgets/application_card.dart';
 import 'package:CareerPilot/widgets/stats_header.dart';
+import 'package:CareerPilot/widgets/welcome_banner.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<JobApplicationsProvider>().fetchApplications();
+      context.read<UserProfileProvider>().fetchProfile();
     });
   }
 
@@ -27,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await Supabase.instance.client.auth.signOut();
     if (context.mounted) {
       context.read<JobApplicationsProvider>().reset();
+      context.read<UserProfileProvider>().reset();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
@@ -49,8 +53,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        body: Consumer<JobApplicationsProvider>(
-            builder: (context, provider, child) {
+        body: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: WelcomeBanner(),
+            ),
+            Expanded(
+              child: Consumer<JobApplicationsProvider>(
+                builder: (context, provider, child) {
           if (provider.isLoading && !provider.hasInitiallyFetched) {
             return const Center(
               child: Column(
@@ -142,6 +153,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       )
                     ],
                   )));
-        }));
+                },
+              ),
+            ),
+          ],
+        ));
   }
 }
