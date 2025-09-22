@@ -190,14 +190,26 @@ class ApplicationCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
-                  const SizedBox(width: 2),
-                  Text(
-                    formattedDate,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
+                        const SizedBox(width: 4),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -243,32 +255,17 @@ class ApplicationCard extends StatelessWidget {
               
               const SizedBox(height: 12),
               
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => _launchUrl(application.jobLink),
-                      icon: const Icon(Icons.open_in_new, size: 14),
-                      label: const Text('View job in Browser', style: TextStyle(fontSize: 11)),
-                    ),
+              // Action button
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () => _launchUrl(application.jobLink),
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: const Text('View job in Browser'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        // Navigate to edit screen
-                      },
-                      icon: Icon(Icons.edit_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

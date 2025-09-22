@@ -1,5 +1,6 @@
 class JobApplication {
   final String id;
+  final String userId;
   final String title;
   final String companyName;
   final String description;
@@ -9,6 +10,7 @@ class JobApplication {
 
   JobApplication({
     required this.id,
+    required this.userId,
     required this.title,
     required this.companyName,
     required this.description,

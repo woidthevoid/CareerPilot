@@ -64,6 +64,7 @@ class JobApplicationsProvider extends ChangeNotifier {
       _applications = response
           .map<JobApplication>((item) => JobApplication(
               id: item['id'].toString(),
+              userId: item['user_id'] ?? '',
               companyName: item['company_name'] ?? '',
               title: item['title'] ?? '',
               description: item['description'] ?? '',
@@ -91,6 +92,37 @@ class JobApplicationsProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _setError('Failed to delete application: $e');
+    }
+  }
+
+  Future<void> addApplication(JobApplication application) async {
+    _clearErrorMessage();
+
+    try {
+      final user = _client.auth.currentUser;
+      if (user == null) {
+        _setError('No authenticated user');
+        return;
+      }
+
+      await _client
+          .from('job_applications')
+          .insert({
+            'title': application.title,
+            'user_id': user.id,
+            'company_name': application.companyName,
+            'description': application.description,
+            'job_link': application.jobLink,
+            'application_status': application.applicationStatus,
+            'created_at': application.createdAt.toIso8601String(),
+          })
+          .select()
+          .single();
+
+      await fetchApplications(force: true);
+    } catch (e) {
+      _setError('Failed to add application: $e');
+      rethrow;
     }
   }
 }
