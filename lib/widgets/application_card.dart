@@ -39,11 +39,28 @@ class ApplicationCard extends StatelessWidget {
     }
   }
 
+  String _formatStatus() {
+    switch (application.applicationStatus) {
+      case 'applied':
+      return 'Applied';
+      case 'interview':
+      return 'Interview';
+      case 'declined':
+      return 'Declined';
+      case 'accepted':
+      return 'Accepted';
+      case 'not_applied':
+      return 'Not Applied';
+      default:
+      return 'Unknown';
+    }
+  }
+
   Future<void> _launchUrl(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
-      print('Launch not possible: $url');
+      throw 'Could not launch $url';
     }
   }
 
@@ -136,7 +153,8 @@ class ApplicationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor();
     final statusIcon = _getStatusIcon();
-    final formattedDate = DateFormat('MM dd, yyyy').format(application.createdAt);
+    final statusText = _formatStatus();
+    final formattedDate = DateFormat('dd MM, yyyy').format(application.createdAt);
 
     return Card(
       elevation: 3,
@@ -179,7 +197,7 @@ class ApplicationCard extends StatelessWidget {
                         Icon(statusIcon, size: 12, color: statusColor),
                         const SizedBox(width: 4),
                         Text(
-                          application.applicationStatus.toUpperCase(),
+                          statusText,
                           style: TextStyle(
                             color: statusColor,
                             fontSize: 11,

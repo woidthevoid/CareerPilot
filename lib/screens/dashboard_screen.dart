@@ -45,10 +45,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: Text('Dashboard'),
           elevation: 0,
           backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           actions: [
             IconButton(
               icon: Icon(Icons.logout),
               onPressed: () => _signOut(context),
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ],
         ),
@@ -175,6 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           },
           backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           child: const Icon(Icons.add),
         ));
   }

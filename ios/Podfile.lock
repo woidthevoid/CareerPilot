@@ -2,9 +2,6 @@ PODS:
   - app_links (6.4.1):
     - Flutter
   - Flutter (1.0.0)
-  - libphonenumber_plugin (0.0.1):
-    - Flutter
-    - PhoneNumberKit
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -23,7 +20,6 @@ PODS:
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - Flutter (from `Flutter`)
-  - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - PhoneNumberKit (~> 3.7.6)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -38,8 +34,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/app_links/ios"
   Flutter:
     :path: Flutter
-  libphonenumber_plugin:
-    :path: ".symlinks/plugins/libphonenumber_plugin/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   shared_preferences_foundation:
@@ -49,8 +43,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_links: 585674be3c6661708e6cd794ab4f39fb9d8356f9
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  libphonenumber_plugin: 48bf4078546377eedaab4aa54978cd0f6fa23072
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PhoneNumberKit: ced55861269312a5e3bc2ef82a58d6255b1c976a
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
