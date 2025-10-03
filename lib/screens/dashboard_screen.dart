@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:CareerPilot/screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:CareerPilot/services/job_applications_provider.dart';
 import 'package:CareerPilot/services/user_profile_provider.dart';
 import 'package:CareerPilot/widgets/application_card.dart';
@@ -32,9 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (context.mounted) {
       context.read<JobApplicationsProvider>().reset();
       context.read<UserProfileProvider>().reset();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      context.go('/login');
     }
   }
 
@@ -42,10 +40,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Dashboard'),
+          title: Text('Home'),
           elevation: 0,
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          animateColor: true,
+          leading: IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.menu),
+            color: Theme.of(context).colorScheme.onPrimary,
+            ),
           actions: [
             IconButton(
               icon: Icon(Icons.logout),

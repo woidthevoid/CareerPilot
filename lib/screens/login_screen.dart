@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:CareerPilot/screens/dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -27,7 +27,7 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
-  // recover password with email
+  // send a otp to email for password recovery
   Future<String?> _recoverPassword(String email) async {
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(email);
@@ -60,12 +60,16 @@ class LoginScreen extends StatelessWidget {
       onRecoverPassword: _recoverPassword,
       onSignup: _signupUser,
       onSubmitAnimationCompleted: () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ));
+        context.go('/dashboard');
       },
       theme: LoginTheme(
         logoWidth: 1,
+      ),
+      messages: LoginMessages(
+        recoverPasswordDescription: 'Enter your email to receive a verification code',
+        recoverPasswordIntro: 'We\'ll send a code to reset your password',
+        recoverPasswordButton: 'Send Code',
+        recoverPasswordSuccess: 'Verification code sent! Check your email and use the code to reset your password.',
       ),
     );
   }
