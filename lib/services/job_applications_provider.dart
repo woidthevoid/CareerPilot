@@ -3,7 +3,10 @@ import 'package:CareerPilot/models/job_application.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class JobApplicationsProvider extends ChangeNotifier {
-  final SupabaseClient _client = Supabase.instance.client;
+  final SupabaseClient _client;
+
+  JobApplicationsProvider({SupabaseClient? client})
+      : _client = client ?? Supabase.instance.client;
 
   List<JobApplication> _applications = [];
   bool _isLoading = false;
@@ -50,6 +53,7 @@ class JobApplicationsProvider extends ChangeNotifier {
     await _fetchApplications();
   }
 
+  // fetch applications from Supabase and map to JobApplication model
   Future<void> _fetchApplications() async {
     _setLoading(true);
     _clearErrorMessage();

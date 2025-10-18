@@ -77,8 +77,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'CareerPilot',
-      theme: FlexThemeData.light(scheme: FlexScheme.indigo) ,
-      darkTheme: FlexThemeData.dark(scheme: FlexScheme.indigo),
+      theme: FlexThemeData.light(scheme: FlexScheme.aquaBlue),
+      darkTheme: FlexThemeData.dark(scheme: FlexScheme.aquaBlue),
       routerConfig: _router,
     );
   }
