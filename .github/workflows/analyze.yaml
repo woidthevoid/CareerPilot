@@ -1,4 +1,4 @@
-name: Flutter Code Analysis
+name: Flutter Code & Security Analysis
 
 on:
   push:
@@ -8,23 +8,27 @@ on:
 
 jobs:
   analyze:
-    name: Run Analyzer and Security Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      # --- 1. Checkout your repo ---
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Flutter SDK
+      # --- 2. Setup Flutter ---
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' 
+          channel: 'stable'
 
-      - name: Install Dependencies
+      # --- 3. Install dependencies ---
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Check for Vulnerabilities
-        run: dart pub outdated --mode=security
+      # --- 4. Run Flutter analyzer with lint enforcement ---
+      - name: Run static analysis
+        run: flutter analyze --fatal-infos --fatal-warnings
 
-      - name: Run Flutter Analyzer
-        run: flutter analyze --fatal-infos
+      # --- 5. Check for outdated dependencies ---
+      - name: Check outdated dependencies
+        run: flutter pub outdated
