@@ -32,8 +32,6 @@ void main() {
 
   group('fetchJobApplications', () {
         test('successfully fetches and parses applications to JobApplication model', () async {
-      // Arrange - Insert mock data into mock Supabase database
-      // This simulates the data that exists in the 'job_applications' table
       await mockClient.from('job_applications').insert([
         {
           'id': '1',
@@ -57,13 +55,9 @@ void main() {
         },
       ]);
 
-      // Act - Call provider's fetchApplications method
       await provider.fetchApplications();
-
-      // Assert - Verify applications parsed correctly to JobApplication model
       expect(provider.applications.length, 2);
       
-      // Verify first application fields
       expect(provider.applications[0].id, '1');
       expect(provider.applications[0].title, 'Software Engineer');
       expect(provider.applications[0].companyName, 'Tech Corp');
@@ -71,13 +65,11 @@ void main() {
       expect(provider.applications[0].jobLink, 'https://techcorp.com/jobs/1');
       expect(provider.applications[0].applicationStatus, 'applied');
       
-      // Verify second application fields
       expect(provider.applications[1].id, '2');
       expect(provider.applications[1].title, 'Product Manager');
       expect(provider.applications[1].companyName, 'Biz Inc');
       expect(provider.applications[1].applicationStatus, 'interviewing');
 
-      // Verify provider state flags following lazy loading pattern
       expect(provider.hasInitiallyFetched, isTrue);
       expect(provider.isLoading, isFalse);
       expect(provider.errorMessage, isNull);
