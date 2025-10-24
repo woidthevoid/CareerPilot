@@ -1,11 +1,9 @@
-import 'package:CareerPilot/services/user_profile_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:CareerPilot/screens/login_screen.dart';
-import 'package:CareerPilot/services/job_applications_provider.dart';
+import 'package:career_pilot/screens/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:CareerPilot/screens/dashboard_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:career_pilot/screens/dashboard_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 Future<void> main() async {
@@ -14,14 +12,11 @@ Future<void> main() async {
   await Supabase.initialize(
       url: 'https://znlyezdoxqdkravzrqhy.supabase.co',
       anonKey: 'sb_publishable_4p0QTK3wL1-OaKkMMGLa2w_rMOdBcCD');
+
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => JobApplicationsProvider()),
-        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
-      ],
+    ProviderScope(
       child: MyApp(),
-      )
+    ),
   );
 }
 

@@ -1,16 +1,17 @@
-import 'package:CareerPilot/services/job_applications_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:CareerPilot/models/job_application.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:career_pilot/providers/job_application_notifier.dart';
+import 'package:career_pilot/models/job_application.dart';
 
-class NewApplicationModal extends StatefulWidget {
+class NewApplicationModal extends ConsumerStatefulWidget {
   const NewApplicationModal({super.key});
 
   @override
-  State<NewApplicationModal> createState() => _NewApplicationModalState();
+  ConsumerState<NewApplicationModal> createState() =>
+      _NewApplicationModalState();
 }
 
-class _NewApplicationModalState extends State<NewApplicationModal> {
+class _NewApplicationModalState extends ConsumerState<NewApplicationModal> {
   final _formKey = GlobalKey<FormState>();
   final _jobTitleController = TextEditingController();
   final _companyNameController = TextEditingController();
@@ -42,40 +43,41 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
 
     setState(() => _isLoading = true);
 
+    // Capture messenger and notifier before async gap
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final notifier = ref.read(jobApplicationsNotifierProvider.notifier);
+
+    final newApplication = JobApplication(
+      id: '',
+      userId: '',
+      title: _jobTitleController.text.trim(),
+      companyName: _companyNameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      jobLink: _jobLinkController.text.trim(),
+      applicationStatus: _selectedStatus,
+      createdAt: DateTime.now(),
+    );
+
     try {
-      final provider = context.read<JobApplicationsProvider>();
+      await notifier.addApplication(newApplication);
 
-      final newApplication = JobApplication(
-        id: '',
-        userId: '',
-        title: _jobTitleController.text.trim(),
-        companyName: _companyNameController.text.trim(),
-        description: _descriptionController.text.trim(),
-        jobLink: _jobLinkController.text.trim(),
-        applicationStatus: _selectedStatus,
-        createdAt: DateTime.now(),
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Job application added successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
-
-      await provider.addApplication(newApplication);
-
-      if(mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Job application added successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            ),
-        );
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -113,9 +115,9 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                 Text(
                   'Add New Application',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -140,12 +142,17 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                     // Job Title
                     TextFormField(
                       controller: _jobTitleController,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         labelText: 'Job Title',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.work, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.work,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -155,16 +162,21 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Company Name
                     TextFormField(
                       controller: _companyNameController,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         labelText: 'Company Name',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.business, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.business,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -174,23 +186,29 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Status Dropdown
                     DropdownButtonFormField<String>(
-                      value: _selectedStatus,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      initialValue: _selectedStatus,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         labelText: 'Application Status',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.flag, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.flag,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       items: _statusOptions.map((status) {
                         return DropdownMenuItem(
                           value: status,
                           child: Text(
                             status.replaceAll('_', ' ').toUpperCase(),
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface),
                           ),
                         );
                       }).toList(),
@@ -199,35 +217,53 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Job Link (Optional)
                     TextFormField(
                       controller: _jobLinkController,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         labelText: 'Job Link (Optional)',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.link, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.link,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         hintText: 'https://...',
-                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+                        hintStyle: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.6)),
                       ),
                       keyboardType: TextInputType.url,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Description (Optional)
                     TextFormField(
                       controller: _descriptionController,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         labelText: 'Description (Optional)',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        labelStyle: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.description, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.description,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         alignLabelWithHint: true,
                         hintText: 'Notes about this application...',
-                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+                        hintStyle: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.6)),
                       ),
                       maxLines: 4,
                       maxLength: 500,
@@ -238,7 +274,7 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
               ),
             ),
           ),
-          
+
           // Submit button
           Padding(
             padding: const EdgeInsets.all(16),
@@ -252,9 +288,13 @@ class _NewApplicationModalState extends State<NewApplicationModal> {
                   foregroundColor: Colors.white,
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : const Text(
                         'Add Application',

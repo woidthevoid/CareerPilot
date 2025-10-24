@@ -1,80 +1,64 @@
 import 'package:flutter/material.dart';
-import 'package:CareerPilot/models/job_application.dart';
+import 'package:career_pilot/models/job_application.dart';
+import 'package:career_pilot/models/job_application_extensions.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:CareerPilot/services/job_applications_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:career_pilot/providers/job_application_notifier.dart';
 
-class ApplicationCard extends StatelessWidget {
+class ApplicationCard extends ConsumerStatefulWidget {
   final JobApplication application;
   final Color cardColor;
 
-  Color _getStatusColor() {
-    switch (application.applicationStatus.toLowerCase()) {
-      case 'applied': 
-      return Colors.orange;
-      case 'interview':
-      return Colors.green;
-      case 'declined':
-      return Colors.red;
-      case 'accepted':
-      return Colors.blue;
-      default:
-      return Colors.grey;
-    }
-  }
+  const ApplicationCard({
+    Key? key,
+    required this.application,
+    required this.cardColor,
+  }) : super(key: key);
 
-  IconData _getStatusIcon() {
-    switch (application.applicationStatus.toLowerCase()) {
-      case 'applied':
-      return Icons.send;
-      case 'interview':
-      return Icons.person;
-      case 'declined':
-      return Icons.close;
-      case 'accepted':
-      return Icons.check;
-      default:
-      return Icons.help;
-    }
-  }
+  @override
+  ConsumerState<ApplicationCard> createState() => _ApplicationCardState();
+}
 
-  String _formatStatus() {
-    switch (application.applicationStatus) {
-      case 'applied':
-      return 'Applied';
-      case 'interview':
-      return 'Interview';
-      case 'declined':
-      return 'Declined';
-      case 'accepted':
-      return 'Accepted';
-      case 'not_applied':
-      return 'Not Applied';
-      default:
-      return 'Unknown';
-    }
-  }
+class _ApplicationCardState extends ConsumerState<ApplicationCard> {
+  JobApplication get application => widget.application;
 
-  Future<void> _launchUrl(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      throw 'Could not launch $url';
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri.parse(url);
+
+    try {
+      if (!await canLaunchUrl(uri)) {
+        if (!mounted) return;
+        messenger
+            .showSnackBar(const SnackBar(content: Text('Could not open URL')));
+        return;
+      }
+
+      final launched = await launchUrl(uri);
+      if (!mounted) return;
+
+      if (!launched) {
+        messenger
+            .showSnackBar(const SnackBar(content: Text('Could not open URL')));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      messenger
+          .showSnackBar(const SnackBar(content: Text('Could not open URL')));
     }
   }
 
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
-              Icon(Icons.warning, color: Colors.red),
+              const Icon(Icons.warning, color: Colors.red),
               const SizedBox(width: 8),
               const Text('Delete application'),
             ],
@@ -83,7 +67,7 @@ class ApplicationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Are you sure you want to delete this application? '),
+              const Text('Are you sure you want to delete this application?'),
               const SizedBox(height: 8),
               Text(
                 '"${application.title}"',
@@ -93,49 +77,39 @@ class ApplicationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'This action can not be undone',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
+              const Text('This action cannot be undone',
+                  style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel')),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
+                  backgroundColor: Colors.red, foregroundColor: Colors.white),
               child: const Text('Delete'),
               onPressed: () async {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Deleting application'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
+                Navigator.of(dialogContext).pop();
+
+                final messenger = ScaffoldMessenger.of(context);
+                final notifier =
+                    ref.read(jobApplicationsNotifierProvider.notifier);
+
+                messenger.showSnackBar(
+                    const SnackBar(content: Text('Deleting application')));
 
                 try {
-                  await context.read<JobApplicationsProvider>().deleteApplication(application.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Application deleted'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                  await notifier.deleteApplication(application.id);
+                  if (!mounted) return;
+                  messenger.showSnackBar(const SnackBar(
+                      content: Text('Application deleted'),
+                      backgroundColor: Colors.green));
+                } catch (_) {
+                  if (!mounted) return;
+                  messenger.showSnackBar(const SnackBar(
                       content: Text('Failed to delete application'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                      backgroundColor: Colors.red));
                 }
               },
             ),
@@ -145,24 +119,19 @@ class ApplicationCard extends StatelessWidget {
     );
   }
 
-  const ApplicationCard(
-      {Key? key, required this.application, required this.cardColor})
-      : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor();
-    final statusIcon = _getStatusIcon();
-    final statusText = _formatStatus();
-    final formattedDate = DateFormat('dd MM, yyyy').format(application.createdAt);
+    final statusColor = application.statusColor;
+    final statusIcon = application.statusIcon;
+    final statusText = application.statusLabel;
+    final formattedDate =
+        DateFormat('dd MM, yyyy').format(application.createdAt);
 
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () {
-          // Handle tap - could navigate to details page
-        },
+        onTap: () {},
         onLongPress: () => _showDeleteDialog(context),
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -173,120 +142,84 @@ class ApplicationCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                cardColor.withValues(alpha: 0.1),
-                cardColor.withValues(alpha: 0.05),
+                widget.cardColor.withOpacity(0.10),
+                widget.cardColor.withOpacity(0.05),
               ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with status and date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha:0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(statusIcon, size: 12, color: statusColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
-                        const SizedBox(width: 4),
-                        Text(
-                          formattedDate,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(statusIcon, size: 12, color: statusColor),
+                  const SizedBox(width: 4),
+                  Text(statusText,
+                      style: TextStyle(
+                          color: statusColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600)),
+                ]),
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Title
-              Text(
-                application.title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.access_time,
+                      size: 12, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
+                  Text(formattedDate,
+                      style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10)),
+                ]),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Text(application.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              
-              const SizedBox(height: 8),
-
-              //Company
-              Text(
-                application.companyName,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 8),
+            Text(application.companyName,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              const SizedBox(height: 8),
-              
-              // Description
-              Text(
-                application.description,
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 8),
+            Text(application.description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7)),
                 maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () => _launchUrl(context, application.jobLink),
+                icon: const Icon(Icons.open_in_new, size: 16),
+                label: const Text('View job in Browser'),
+                style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12)),
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Action button
-              SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () => _launchUrl(application.jobLink),
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: const Text('View job in Browser'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ]),
         ),
       ),
     );
