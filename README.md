@@ -4,6 +4,8 @@ Helping you pilot through you job search easily.
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/woidthevoid/CareerPilot?display_timestamp=author&style=for-the-badge&logo=git)
 ![GitHub Created At](https://img.shields.io/github/created-at/woidthevoid/CareerPilot?&style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/woidthevoid/CareerPilot/analyze.yaml?style=for-the-badge)
+
 
 
 ## What is it?
