@@ -27,11 +27,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _signOut(BuildContext context) async {
+    final router = GoRouter.of(context);
+
     await Supabase.instance.client.auth.signOut();
     if (!mounted) return;
+    
     ref.read(jobApplicationsNotifierProvider.notifier).reset();
     ref.read(userProfileNotifierProvider.notifier).reset();
-    context.go('/login');
+    router.go('/login');
   }
 
   @override

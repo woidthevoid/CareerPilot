@@ -11,10 +11,10 @@ class ApplicationCard extends ConsumerStatefulWidget {
   final Color cardColor;
 
   const ApplicationCard({
-    Key? key,
+    super.key,
     required this.application,
     required this.cardColor,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<ApplicationCard> createState() => _ApplicationCardState();
@@ -30,8 +30,7 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
     try {
       if (!await canLaunchUrl(uri)) {
         if (!mounted) return;
-        messenger
-            .showSnackBar(const SnackBar(content: Text('Could not open URL')));
+        messenger.showSnackBar(const SnackBar(content: Text('Could not open URL')));
         return;
       }
 
@@ -39,13 +38,11 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
       if (!mounted) return;
 
       if (!launched) {
-        messenger
-            .showSnackBar(const SnackBar(content: Text('Could not open URL')));
+        messenger.showSnackBar(const SnackBar(content: Text('Could not open URL')));
       }
     } catch (_) {
       if (!mounted) return;
-      messenger
-          .showSnackBar(const SnackBar(content: Text('Could not open URL')));
+      messenger.showSnackBar(const SnackBar(content: Text('Could not open URL')));
     }
   }
 
@@ -54,8 +51,7 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               const Icon(Icons.warning, color: Colors.red),
@@ -77,39 +73,28 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text('This action cannot be undone',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text('This action cannot be undone', style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
           actions: [
-            TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
               child: const Text('Delete'),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-
                 final messenger = ScaffoldMessenger.of(context);
-                final notifier =
-                    ref.read(jobApplicationsNotifierProvider.notifier);
+                final notifier = ref.read(jobApplicationsNotifierProvider.notifier);
 
-                messenger.showSnackBar(
-                    const SnackBar(content: Text('Deleting application')));
+                messenger.showSnackBar(const SnackBar(content: Text('Deleting application')));
 
                 try {
                   await notifier.deleteApplication(application.id);
                   if (!mounted) return;
-                  messenger.showSnackBar(const SnackBar(
-                      content: Text('Application deleted'),
-                      backgroundColor: Colors.green));
+                  messenger.showSnackBar(const SnackBar(content: Text('Application deleted'), backgroundColor: Colors.green));
                 } catch (_) {
                   if (!mounted) return;
-                  messenger.showSnackBar(const SnackBar(
-                      content: Text('Failed to delete application'),
-                      backgroundColor: Colors.red));
+                  messenger.showSnackBar(const SnackBar(content: Text('Failed to delete application'), backgroundColor: Colors.red));
                 }
               },
             ),
@@ -124,8 +109,7 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
     final statusColor = application.statusColor;
     final statusIcon = application.statusIcon;
     final statusText = application.statusLabel;
-    final formattedDate =
-        DateFormat('dd MM, yyyy').format(application.createdAt);
+    final formattedDate = DateFormat('dd MM, yyyy').format(application.createdAt);
 
     return Card(
       elevation: 3,
@@ -142,72 +126,39 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                widget.cardColor.withOpacity(0.10),
-                widget.cardColor.withOpacity(0.05),
+                widget.cardColor.withValues(alpha: 0.10),
+                widget.cardColor.withValues(alpha: 0.05),
               ],
             ),
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(statusIcon, size: 12, color: statusColor),
                   const SizedBox(width: 4),
-                  Text(statusText,
-                      style: TextStyle(
-                          color: statusColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600)),
+                  Text(statusText, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600)),
                 ]),
               ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.access_time,
-                      size: 12, color: Colors.grey.shade600),
+                  Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
                   const SizedBox(width: 4),
-                  Text(formattedDate,
-                      style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 10)),
+                  Text(formattedDate, style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500, fontSize: 10)),
                 ]),
               ),
             ]),
             const SizedBox(height: 12),
-            Text(application.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis),
+            Text(application.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 8),
-            Text(application.companyName,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w500),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
+            Text(application.companyName, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 8),
-            Text(application.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.7)),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis),
+            Text(application.description, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)), maxLines: 3, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -215,8 +166,7 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
                 onPressed: () => _launchUrl(context, application.jobLink),
                 icon: const Icon(Icons.open_in_new, size: 16),
                 label: const Text('View job in Browser'),
-                style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12)),
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
               ),
             ),
           ]),
