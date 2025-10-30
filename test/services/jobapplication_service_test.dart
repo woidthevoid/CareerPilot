@@ -40,7 +40,7 @@ void main() {
     );
     service = JobApplicationService(
       client: mockClient,
-      testUserId: testUserId,
+      userIdProvider: () => testUserId,
     );
   });
 
@@ -290,7 +290,7 @@ void main() {
       );
       service = JobApplicationService(
         client: mockClient,
-        testUserId: testUserId,
+        userIdProvider: () => testUserId,
       );
     });
 

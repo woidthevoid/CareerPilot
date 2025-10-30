@@ -3,13 +3,13 @@ import 'package:career_pilot/models/job_application.dart';
 
 class JobApplicationService {
   final SupabaseClient _client;
-  final String? _testUserId; // For testing only
+  final String? Function()? _userIdProvider;
 
   JobApplicationService({
     SupabaseClient? client,
-    String? testUserId, 
+    String? Function()? userIdProvider,
   })  : _client = client ?? Supabase.instance.client,
-        _testUserId = testUserId;
+        _userIdProvider = userIdProvider;
 
   List<JobApplication>? _cachedApplications;
 
@@ -27,7 +27,7 @@ class JobApplicationService {
   }
 
   String? get _currentUserId {
-    if (_testUserId != null) return _testUserId;
+    if (_userIdProvider != null) return _userIdProvider();
     return _client.auth.currentUser?.id;
   }
 

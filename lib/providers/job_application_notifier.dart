@@ -26,9 +26,8 @@ class JobApplicationNotifier
 
     state = const AsyncValue.loading();
     try {
-      final list = await ref
-          .read(jobApplicationServiceProvider)
-          .applications;
+      final svc = ref.read(jobApplicationServiceProvider);
+      final list = force ? await svc.refresh() : await svc.applications;
       state = AsyncValue.data(list);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
