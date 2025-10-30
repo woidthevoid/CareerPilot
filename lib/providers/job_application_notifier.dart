@@ -8,7 +8,7 @@ final jobApplicationServiceProvider =
 final jobApplicationsFutureProvider =
     FutureProvider.autoDispose<List<JobApplication>>((ref) async {
   final svc = ref.read(jobApplicationServiceProvider);
-  return svc.fetchApplications();
+  return svc.applications;
 });
 
 class JobApplicationNotifier
@@ -26,9 +26,8 @@ class JobApplicationNotifier
 
     state = const AsyncValue.loading();
     try {
-      final list = await ref
-          .read(jobApplicationServiceProvider)
-          .fetchApplications(force: force);
+      final svc = ref.read(jobApplicationServiceProvider);
+      final list = force ? await svc.refresh() : await svc.applications;
       state = AsyncValue.data(list);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

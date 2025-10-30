@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
+import 'package:career_pilot/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,25 +14,19 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
+  late final _authService = AuthService(client: Supabase.instance.client);
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isFormValid = false;
 
-  Future<String?> _authUser(String email, String password) async {
-    try {
-      final res = await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-
-      if (res.user == null) {
-        return 'Login failed';
-      }
-      return null; // success
-    } on AuthException catch (e) {
-      return e.message;
-    } catch (e) {
-      return 'Unexpected error: $e';
-    }
+  void _validateForm() {
+    final emailValue = _formKey.currentState?.fields['email']?.value;
+    final passwordValue = _formKey.currentState?.fields['password']?.value;
+    
+    setState(() {
+      _isFormValid = (emailValue?.isNotEmpty ?? false) && 
+                     (passwordValue?.isNotEmpty ?? false);
+    });
   }
 
   Future<void> _handleLogin() async {
@@ -44,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _formKey.currentState?.fields['email']?.value;
       final password = _formKey.currentState?.fields['password']?.value;
 
-      final res = await _authUser(email, password);
+      final res = await _authService.signIn(email, password);
 
       if (res != null) {
         setState(() {
@@ -101,9 +96,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   constraints: const BoxConstraints(maxWidth: 400),
                   child: FormBuilder(
                     key: _formKey,
+                    onChanged: _validateForm,
                     child: Column(
                       children: [
-                        // Email field
                         FormBuilderTextField(
                           name: 'email',
                           decoration: InputDecoration(
@@ -121,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
                         
-                        // Password field
                         FormBuilderTextField(
                           name: 'password',
                           obscureText: true,
@@ -136,19 +130,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 24),
                         
-                        // Login button
                         SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
+                            onPressed: (_isLoading || !_isFormValid) ? null : _handleLogin,
                             child: _isLoading
                                 ? const CircularProgressIndicator()
                                 : const Text('Login'),
                           ),
                         ),
                         
-                        // Error message
                         if (_errorMessage != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
