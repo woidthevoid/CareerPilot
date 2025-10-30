@@ -1,32 +1,39 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:career_pilot/models/job_application.dart';
 
 class JobApplicationService {
   final SupabaseClient _client;
+  final String? _testUserId; // For testing only
 
-  JobApplicationService({SupabaseClient? client})
-  : _client = client ?? Supabase.instance.client;
+  JobApplicationService({
+    SupabaseClient? client,
+    String? testUserId, 
+  })  : _client = client ?? Supabase.instance.client,
+        _testUserId = testUserId;
 
-  final List<JobApplication> _cache = [];
-  bool _hasFetched = false;
-  Future<List<JobApplication>>? _ongoingFetch;
+  List<JobApplication>? _cachedApplications;
 
-  List<JobApplication> get cachedApplications => List.unmodifiable(_cache);
-
-  Future<List<JobApplication>> fetchApplications({bool force = false}) async {
-
-    if (!force && _hasFetched) {
-      return Future.value(List.unmodifiable(_cache));
+  Future<List<JobApplication>> get applications async {
+    // ignore: prefer_conditional_assignment
+    if (_cachedApplications == null) {
+      _cachedApplications = await _fetchFromDatabase();
     }
-
-    _ongoingFetch ??= _doFetch().whenComplete(() => _ongoingFetch = null);
-    return _ongoingFetch!;
+    return List.unmodifiable(_cachedApplications!);
   }
 
-  Future<List<JobApplication>> _doFetch() async {
-    final user = _client.auth.currentUser;
-    if (user == null) {
+  Future<List<JobApplication>> refresh() async {
+    _cachedApplications = await _fetchFromDatabase();
+    return List.unmodifiable(_cachedApplications!);
+  }
+
+  String? get _currentUserId {
+    if (_testUserId != null) return _testUserId;
+    return _client.auth.currentUser?.id;
+  }
+
+  Future<List<JobApplication>> _fetchFromDatabase() async {
+    final userId = _currentUserId;
+    if (userId == null) {
       throw StateError('No authenticated user');
     }
 
@@ -36,12 +43,10 @@ class JobApplicationService {
           .select(
             'id, user_id, company_name, title, description, job_link, created_at, application_status',
           )
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .order('created_at', ascending: false);
 
-      if (response.isEmpty) return List.unmodifiable(_cache);
-
-      final List<JobApplication> fetched = (response as List).map<JobApplication>((item) {
+      return (response as List).map<JobApplication>((item) {
         return JobApplication(
           id: item['id'].toString(),
           userId: item['user_id']?.toString() ?? '',
@@ -53,40 +58,23 @@ class JobApplicationService {
           applicationStatus: item['application_status'] ?? 'not applied',
         );
       }).toList();
-
-      if (!_hasFetched || _cache.isEmpty) {
-        _cache
-          ..clear()
-          ..addAll(fetched);
-        _hasFetched = true;
-      } else {
-        final cachedIds = _cache.map((e) => e.id).toSet();
-        final newItems = fetched.where((f) => !cachedIds.contains(f.id)).toList();
-        if (newItems.isNotEmpty) {
-          _cache.insertAll(0, newItems);
-        }
-        final fetchedIds = fetched.map((e) => e.id).toSet();
-        _cache.removeWhere((c) => !fetchedIds.contains(c.id));
-      }
-
-      return List.unmodifiable(_cache);
     } catch (e) {
       rethrow;
     }
   }
 
   Future<JobApplication> addApplication(JobApplication application) async {
-    final user = _client.auth.currentUser;
-    if (user == null) {
+    final userId = _currentUserId;
+    if (userId == null) {
       throw StateError('No authenticated user');
     }
 
     try {
-      final inserted = await _client
+      final response = await _client
           .from('job_applications')
           .insert({
             'title': application.title,
-            'user_id': user.id,
+            'user_id': userId,
             'company_name': application.companyName,
             'description': application.description,
             'job_link': application.jobLink,
@@ -97,18 +85,20 @@ class JobApplicationService {
           .single();
 
       final JobApplication created = JobApplication(
-        id: inserted['id'].toString(),
-        userId: inserted['user_id']?.toString() ?? '',
-        companyName: inserted['company_name'] ?? '',
-        title: inserted['title'] ?? '',
-        description: inserted['description'] ?? '',
-        jobLink: inserted['job_link'] ?? '',
-        createdAt: DateTime.tryParse(inserted['created_at'] ?? '') ?? DateTime.now(),
-        applicationStatus: inserted['application_status'] ?? 'not applied',
+        id: response['id'].toString(),
+        userId: response['user_id']?.toString() ?? '',
+        companyName: response['company_name'] ?? '',
+        title: response['title'] ?? '',
+        description: response['description'] ?? '',
+        jobLink: response['job_link'] ?? '',
+        createdAt: DateTime.tryParse(response['created_at'] ?? '') ?? DateTime.now(),
+        applicationStatus: response['application_status'] ?? 'not applied',
       );
 
-      _cache.insert(0, created);
-      _hasFetched = true;
+      if (_cachedApplications != null) {
+        _cachedApplications = [created, ..._cachedApplications!];
+      }
+
       return created;
     } catch (e) {
       rethrow;
@@ -116,8 +106,8 @@ class JobApplicationService {
   }
 
   Future<void> deleteApplication(String id) async {
-    final user = _client.auth.currentUser;
-    if (user == null) {
+    final userId = _currentUserId;
+    if (userId == null) {
       throw StateError('No authenticated user');
     }
 
@@ -126,18 +116,19 @@ class JobApplicationService {
           .from('job_applications')
           .delete()
           .eq('id', id)
-          .eq('user_id', user.id);
+          .eq('user_id', userId);
 
-      _cache.removeWhere((app) => app.id == id);
+      if (_cachedApplications != null) {
+        _cachedApplications = _cachedApplications!
+            .where((app) => app.id != id)
+            .toList();
+      }
     } catch (e) {
       rethrow;
     }
   }
-
+  
   void resetCache() {
-    _cache.clear();
-    _hasFetched = false;
-    _ongoingFetch = null;
+    _cachedApplications = null;
   }
-
 }
