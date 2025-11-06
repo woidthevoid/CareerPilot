@@ -40,4 +40,4 @@ VS Code is recommended to make running the app smoother.
    ```
    This will give you are list of emulators you can run it on.
    
-   The app is currently for MacOS and iOS so you will need a physical device running these or a emulator. Works on both macOS 26 and iOS 26.
+   The app is currently for MacOS and iOS so you will need a physical device running these or a emulator along with Xcode. Works on both macOS 26 and iOS 26.
