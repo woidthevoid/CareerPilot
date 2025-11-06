@@ -1,4 +1,4 @@
-name: Flutter Code & Security Analysis
+name: Flutter test and analysis
 
 on:
   push:
@@ -25,10 +25,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # --- 4. Run Flutter analyzer with lint enforcement ---
+      # --- 4. Run tests ---
+      - name: Run tests
+        run: flutter test
+
+      # --- 5. Run Flutter analyzer with lint enforcement ---
       - name: Run static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
 
-      # --- 5. Check for outdated dependencies ---
+      # --- 6. Check for outdated dependencies ---
       - name: Check outdated dependencies
         run: flutter pub outdated
