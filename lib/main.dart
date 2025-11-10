@@ -32,25 +32,14 @@ class MyApp extends StatelessWidget {
     redirect: (context, state) {
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggedIn = session != null;
-      final isLoginPage = state.matchedLocation == '/login';
+      final location = state.matchedLocation;
 
-      if (!isLoggedIn && !isLoginPage) {
-        return '/login';
+      // Single redirect logic - more efficient
+      if (isLoggedIn) {
+        return (location == '/login' || location == '/') ? '/dashboard' : null;
+      } else {
+        return location == '/login' ? null : '/login';
       }
-
-      if (isLoggedIn && isLoginPage) {
-        return '/dashboard';
-      }
-
-      if (isLoggedIn && state.matchedLocation == '/') {
-        return '/dashboard';
-      }
-
-      if (!isLoggedIn && state.matchedLocation == '/') {
-        return '/login';
-      }
-
-      return null;
     },
 
     routes: [
@@ -64,10 +53,7 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/',
-        redirect: (context, state) {
-          final session = Supabase.instance.client.auth.currentSession;
-          return session != null ? '/dashboard' : '/login';
-        },
+        builder: (context, state) => const DashboardScreen(),
       ),
     ],
   );

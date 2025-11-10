@@ -13,13 +13,22 @@ class StatsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Single-pass optimization: count all statuses in one iteration
     final totalCount = applications.length;
-    final appliedCount = applications.where((app) =>
-    app.applicationStatus.toLowerCase() == 'applied').length;
-    final interviewingCount = applications.where((app) =>
-    app.applicationStatus.toLowerCase() == 'interview').length;
-    final rejectedCount = applications.where((app) =>
-    app.applicationStatus.toLowerCase() == 'declined').length;
+    var appliedCount = 0;
+    var interviewingCount = 0;
+    var rejectedCount = 0;
+    
+    for (final app in applications) {
+      final status = app.applicationStatus.toLowerCase();
+      if (status == 'applied') {
+        appliedCount++;
+      } else if (status == 'interview') {
+        interviewingCount++;
+      } else if (status == 'declined') {
+        rejectedCount++;
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),

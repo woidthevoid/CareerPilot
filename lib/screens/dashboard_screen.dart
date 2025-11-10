@@ -21,8 +21,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(jobApplicationsNotifierProvider.notifier).load();
-      ref.read(userProfileNotifierProvider.notifier).load();
+      // Load both providers in parallel for better performance
+      Future.wait([
+        ref.read(jobApplicationsNotifierProvider.notifier).load(),
+        ref.read(userProfileNotifierProvider.notifier).load(),
+      ]);
     });
   }
 
@@ -154,11 +157,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         Expanded(
                           child: ListView.builder(
                             itemCount: apps.length,
+                            // Optimize performance by caching extent
+                            cacheExtent: 500.0,
                             itemBuilder: (context, index) {
                               final application = apps[index];
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: ApplicationCard(
+                                  key: ValueKey(application.id),
                                   application: application,
                                   cardColor: Theme.of(context)
                                       .colorScheme

@@ -118,11 +118,8 @@ class JobApplicationService {
           .eq('id', id)
           .eq('user_id', userId);
 
-      if (_cachedApplications != null) {
-        _cachedApplications = _cachedApplications!
-            .where((app) => app.id != id)
-            .toList();
-      }
+      // Optimize: Only update cache if it exists
+      _cachedApplications?.removeWhere((app) => app.id == id);
     } catch (e) {
       rethrow;
     }

@@ -106,6 +106,7 @@ class _ApplicationCardState extends ConsumerState<ApplicationCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Cache expensive computations to avoid repeated extension method calls
     final statusColor = application.statusColor;
     final statusIcon = application.statusIcon;
     final statusText = application.statusLabel;

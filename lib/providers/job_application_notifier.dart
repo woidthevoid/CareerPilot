@@ -53,14 +53,16 @@ class JobApplicationNotifier
 
   Future<void> deleteApplication(String id) async {
     final previous = state;
-    if (state is AsyncData) {
-      final newList = List<JobApplication>.from((state as AsyncData).value)
-        ..removeWhere((a) => a.id == id);
-      state = AsyncValue.data(newList);
-    }
-
+    
     try {
       await ref.read(jobApplicationServiceProvider).deleteApplication(id);
+      
+      // Only update state after successful deletion
+      if (state is AsyncData) {
+        final newList = List<JobApplication>.from((state as AsyncData).value)
+          ..removeWhere((a) => a.id == id);
+        state = AsyncValue.data(newList);
+      }
     } catch (e, st) {
       state = previous;
       state = AsyncValue.error(e, st);
